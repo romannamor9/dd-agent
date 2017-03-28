@@ -92,7 +92,6 @@ class DockerUtil:
             try:
                 containers = self.client.containers()
                 for co in containers:
-                    log.warning("bla")
                     if '/ecs-agent' in co.get('Names', ''):
                         self._is_ecs = True
                         break
