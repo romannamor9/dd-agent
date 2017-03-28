@@ -136,7 +136,7 @@ class SDDockerBackend(AbstractSDBackend):
             return
 
         identifier = inspect.get('Config', {}).get('Labels', {}).get(DATADOG_ID) or \
-            inspect.get('Config', {}).get('Image')
+            DockerUtil().image_name_extractor(inspect)
 
         platform_kwargs = {}
         if Platform.is_k8s():
@@ -345,7 +345,7 @@ class SDDockerBackend(AbstractSDBackend):
         configs = {}
         state = self._make_fetch_state()
         containers = [(
-            container.get('Image'),
+            DockerUtil().image_name_extractor(container),
             container.get('Id'), container.get('Labels')
         ) for container in self.docker_client.containers()]
 
