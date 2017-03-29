@@ -22,6 +22,7 @@ from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.abstract_sd_backend import AbstractSDBackend
 from utils.service_discovery.config_stores import get_config_store
+from utils.orchestrator import NomadUtil
 
 DATADOG_ID = 'com.datadoghq.sd.check.id'
 
@@ -90,6 +91,9 @@ class SDDockerBackend(AbstractSDBackend):
         self.docker_client = DockerUtil(config_store=self.config_store).client
         if Platform.is_k8s():
             self.kubeutil = KubeUtil()
+
+        self.nomadutil = NomadUtil()
+        self.nomadutil.init_platform(agentConfig)
 
         self.VAR_MAPPING = {
             'host': self._get_host_address,
@@ -321,7 +325,7 @@ class SDDockerBackend(AbstractSDBackend):
                 tags.append('rancher_container:%s' % container_name)
 
         elif Platform.is_nomad():
-            nomad_tags = DockerUtil().extract_nomad_tags(state.inspect_container(c_id))
+            nomad_tags = self.nomadutil.extract_container_tags(state.inspect_container(c_id))
             if nomad_tags:
                 tags.extend(list(nomad_tags))
 
